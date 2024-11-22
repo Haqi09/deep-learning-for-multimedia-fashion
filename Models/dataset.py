@@ -62,8 +62,8 @@ class FashionDataset(torch.utils.data.Dataset):
         # Menentukan jumlah minimum sampel untuk setiap split
         min_samples = min(category_counts.values())
         train_size = int(min_samples * 0.6)
-        val_size = int(min_samples * 0.2)
-        test_size = int(min_samples * 0.2)
+        val_size = int(min_samples * 0.3)
+        test_size = int(min_samples * 0.1)
 
         print(f"\nBalanced split sizes:")
         print(f"Train samples per category: {train_size}")

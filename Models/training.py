@@ -1,7 +1,7 @@
 from torchvision import transforms
 from dataset import FashionDataset
 from helper_tester import ModelTesterMetrics
-from model_base import SimpleCNN, BasicMobileNet
+from model_base import FashionCNN
 from helper_logger import DataLogger
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -21,7 +21,7 @@ np.random.seed(SEED)
 torch.use_deterministic_algorithms(False)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-total_epochs = 10
+total_epochs = 40
 batch_size = 16
 
 if __name__ == "__main__":
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     print("| Batch Size  :", batch_size)
     print("| Device      :", device)
 
-    logger = DataLogger("FashionClassification")
+    logger = DataLogger("FashionClassification-FashionCNN")
     metrics = ModelTesterMetrics()
 
     # metrics.loss = torch.nn.BCEWithLogitsLoss()
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     metrics.loss = torch.nn.BCEWithLogitsLoss(pos_weight=class_weights)
     metrics.activation = torch.nn.Softmax(1)
 
-    model = BasicMobileNet(7).to(device)
+    model = FashionCNN(7).to(device)
     optimizer = torch.optim.Adam(
         model.parameters(), lr=0.00005, weight_decay=0.0001)
 
@@ -69,12 +69,23 @@ if __name__ == "__main__":
         current_lr = optimizer.param_groups[0]['lr']
         print(f"Current learning rate: {current_lr:.6f}")
 
+    # Simple Augmentation
+    # training_augmentation = [
+    #     transforms.RandomHorizontalFlip(),
+    #     transforms.RandomRotation(20),
+    #     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+    #     transforms.RandomAffine(
+    #         degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+    # ]
+
+    # Augmentation Barbar
     training_augmentation = [
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(20),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomVerticalFlip(p=0.2),
+        transforms.RandomRotation(30),
+        transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3),
         transforms.RandomAffine(
-            degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+            degrees=30, translate=(0.2, 0.2), scale=(0.8, 1.2)),
     ]
 
     # Menggunakan dataset yang sama dengan mode berbeda

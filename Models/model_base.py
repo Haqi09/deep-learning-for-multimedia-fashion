@@ -31,7 +31,7 @@ class BasicConvBlock(nn.Module):
         return x
 
 
-class SimpleCNN(nn.Module):
+class FashionCNN(nn.Module):
     def __init__(self, output_class: int) -> None:
         super().__init__()
 
@@ -57,8 +57,12 @@ class SimpleCNN(nn.Module):
         # 256
 
         self.head = nn.Sequential(
-            nn.Linear(256, 64),
+            nn.Linear(256, 128),
             nn.LeakyReLU(),
+            nn.Dropout(0.25),
+            nn.Linear(128, 64),
+            nn.LeakyReLU(),
+            nn.Dropout(0.25),
             nn.Linear(64, output_class)
         )
 
@@ -83,28 +87,10 @@ class SimpleCNN(nn.Module):
         return x
 
 
-class BasicMobileNet(nn.Module):
-    def __init__(self, output_classes: int) -> None:
-        super().__init__()
-
-        self.base = tv.models.mobilenet_v3_small(
-            weights=tv.models.MobileNet_V3_Small_Weights.DEFAULT)
-        self.base.classifier = nn.Sequential(
-            nn.Linear(576, 128),
-            nn.LeakyReLU(),
-            nn.Dropout(0.25),
-            nn.Linear(128, output_classes)
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.base(x)
-        return x
-
-
 if __name__ == "__main__":
     print("Model Base Run")
 
     t = torch.rand(1, 3, 64, 64)
-    model = SimpleCNN(7)
+    model = FashionCNN(7)
     y = model(t)
     print(y)

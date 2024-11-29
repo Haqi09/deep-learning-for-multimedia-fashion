@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision as tv
+import torch.nn.functional as F
 
 
 class BasicConvolution(nn.Module):
@@ -23,6 +24,7 @@ class BasicConvBlock(nn.Module):
     def __init__(self, input_ch: int, output_ch: int) -> None:
         super().__init__()
         self.conv = BasicConvolution(input_ch, output_ch)
+        self.dropout = nn.Dropout2d(0.1)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
     def forward(self, x):
@@ -38,6 +40,7 @@ class FashionCNN(nn.Module):
         # 3, 128, 128
         # aku ubah kernel size dari 7 ke 5
         self.conv_1 = nn.Conv2d(3, 16, kernel_size=5, padding="same")
+
         self.block_1 = BasicConvBlock(16, 32)
 
         # 32, 64, 64
@@ -57,12 +60,31 @@ class FashionCNN(nn.Module):
         # 256
 
         self.head = nn.Sequential(
+            # nn.Linear(256, 128),
+            # nn.LeakyReLU(),
+            # nn.Dropout(0.25),
+
+            # nn.Linear(128, 64),
+            # nn.LeakyReLU(),
+            # nn.Dropout(0.25),
+            # nn.Linear(64, output_class)
+
+            nn.Linear(256, 256),  # Layer lebih lebar
+            nn.LeakyReLU(negative_slope=0.2),
+            nn.BatchNorm1d(256),
+            nn.Dropout(0.25),
+
             nn.Linear(256, 128),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(negative_slope=0.2),
+            nn.BatchNorm1d(128),
             nn.Dropout(0.25),
+
             nn.Linear(128, 64),
-            nn.LeakyReLU(),
-            nn.Dropout(0.25),
+            nn.LeakyReLU(negative_slope=0.2),
+            nn.BatchNorm1d(64),
+            nn.Dropout(0.20),
+
+
             nn.Linear(64, output_class)
         )
 

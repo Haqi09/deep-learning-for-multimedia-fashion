@@ -21,7 +21,7 @@ np.random.seed(SEED)
 torch.use_deterministic_algorithms(False)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-total_epochs = 40
+total_epochs = 60
 batch_size = 16
 
 if __name__ == "__main__":
@@ -34,18 +34,6 @@ if __name__ == "__main__":
     logger = DataLogger("FashionClassification-FashionCNN")
     metrics = ModelTesterMetrics()
 
-    # metrics.loss = torch.nn.BCEWithLogitsLoss()
-    # metrics.activation = torch.nn.Softmax(1)
-
-    # model = BasicMobileNet(7).to(device)
-    # optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)
-
-    # training_augmentation = [
-    #     transforms.RandomHorizontalFlip(),
-    #     transforms.RandomRotation(15),
-    #     transforms.ColorJitter(brightness=0.2, contrast=0.2),
-    # ]
-
     # Menambahkan class weights untuk mengatasi imbalance
     class_weights = torch.tensor(
         [1.0, 1.0, 2.0, 2.0, 1.0, 1.0, 1.0]).to(device)
@@ -53,8 +41,15 @@ if __name__ == "__main__":
     metrics.activation = torch.nn.Softmax(1)
 
     model = FashionCNN(7).to(device)
-    optimizer = torch.optim.Adam(
-        model.parameters(), lr=0.00005, weight_decay=0.0001)
+
+    # optimizer = torch.optim.Adam(
+    #     model.parameters(), lr=0.00005, weight_decay=0.0001)
+
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=0.00025,
+        weight_decay=0.01
+    )
 
     # Scheduler tanpa parameter verbose
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -64,7 +59,7 @@ if __name__ == "__main__":
         patience=5
     )
 
-    # Tambahkan fungsi untuk mencetak learning rate
+    # Fungsi untuk mencetak learning rate
     def print_lr():
         current_lr = optimizer.param_groups[0]['lr']
         print(f"Current learning rate: {current_lr:.6f}")
@@ -87,6 +82,25 @@ if __name__ == "__main__":
         transforms.RandomAffine(
             degrees=30, translate=(0.2, 0.2), scale=(0.8, 1.2)),
     ]
+
+    # Agumentation barbar x
+    # training_augmentation = [
+    #     transforms.RandomHorizontalFlip(p=0.5),
+    #     transforms.RandomVerticalFlip(p=0.2),
+    #     transforms.RandomRotation(45),
+    #     transforms.ColorJitter(
+    #         brightness=0.3,
+    #         contrast=0.3,
+    #         saturation=0.3,
+    #         hue=0.1
+    #     ),
+    #     transforms.RandomAffine(
+    #         degrees=30,
+    #         translate=(0.2, 0.2),
+    #         scale=(0.8, 1.2),
+    #         shear=15
+    #     ),
+    # ]
 
     # Menggunakan dataset yang sama dengan mode berbeda
     base_path = '../Dataset'
